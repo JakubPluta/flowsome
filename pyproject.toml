@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "polarflow"
+version = "0.1.0"
+description = "Build data pipelines in easy way with Polars"
+authors = ["jp <plutakuba@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+polars = "^0.20.15"
+pyyaml = "^6.0.1"
+deltalake = "^0.16.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+black = "^24.2.0"
+isort = "^5.13.2"
+pytest-cov = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
