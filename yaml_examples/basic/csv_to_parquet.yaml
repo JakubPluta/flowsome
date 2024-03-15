@@ -1,0 +1,10 @@
+name: direct
+pipeline:
+  source:
+    type: file
+    format: csv
+    path: ../data.csv
+  target:
+    type: parquet
+    format: csv
+    path: ../data.csv
