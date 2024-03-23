@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "flowsome"
 version = "0.1.0"
-description = "Build data pipelines in easy way with Polars"
+description = "Minimal framework for building and executing data workflows on a single machine"
 authors = ["jp <plutakuba@gmail.com>"]
 license = "MIT"
 readme = "README.md"
