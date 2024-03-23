@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "polarflow"
+name = "flowsome"
 version = "0.1.0"
 description = "Build data pipelines in easy way with Polars"
 authors = ["jp <plutakuba@gmail.com>"]
