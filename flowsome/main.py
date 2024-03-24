@@ -1,14 +1,13 @@
-from flowsome import Client
+from client import Client
+from client import PolarsBackend
+from configuration.config import Config
+import polars as pl
 
+client = Client(backend=PolarsBackend, config=Config())
 
-config = object
+file_path = r'tests\data\sample.csv'
 
-client = Client(backend='polars', config=config)
+client.read(file_path, schema=None).filterby(Country = "Malta").limit(n=100).to_parquet(file_path="data.parquet")
 
-client.read(
-    file="data.csv", 
-    schema="infer", 
-    columns=['col1', 'col2', 'col2']
-).filter_by("col1 = abc").limit(n=100).to_parquet(
-    file="data.parquet", partition_by=['col1'] 
-)
+pq = pl.scan_parquet(r"data.parquet")
+print(pq.collect())
