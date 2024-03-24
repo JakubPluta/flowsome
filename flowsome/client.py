@@ -1,49 +1,45 @@
-from flowsome import Client
+from typing import Callable, List
+
 
 class Dataset:
     pass
 
 
 class DataReader:
-    pass 
+    pass
 
 
 class Transformer:
-    pass 
-    
+    pass
+
 
 class Backend:
-    
-    def __init__(self, flow) -> None:
-        self.flow = flow 
-    def execute(self):
+
+    def execute(self, client: "Client"):
         pass
-    
-    
+
+
 class PolarsBackend(Backend):
     def execute(self):
         print("executing polars flow")
         return self.execute(self.flow)
-    
 
 
 class Client:
-    def __init__(self, backend: Backend, config):
+    def __init__(self, config, backend: Backend = PolarsBackend()):
         self._backend = backend
         self._config = config
-        self._pipeline = []
-        
+        self._pipeline: List[Callable] = []
 
-    def read(self):
+    def read(self, **kwargs):
         """Interace for reading from polars"""
-        pass 
+        pass
 
-    def filterby(self):
-        pass 
+    def filterby(self, **kwargs):
+        pass
 
     def limit(self, n=None):
         pass
-    
-    def to_parquet(self):
-        return self._backend.execute(self)
 
+    def to_parquet(self, **kwargs):
+        return self._backend.execute(self)
