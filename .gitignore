@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 /recipes.parquet
 /.README.md
+/data.parquet
