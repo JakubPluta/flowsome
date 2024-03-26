@@ -5,6 +5,13 @@ description = "Minimal framework for building and executing data workflows on a 
 authors = ["jp <plutakuba@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://github.com/JakubPluta/flowsome/"
+repository = "https://github.com/JakubPluta/flowsome/"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -26,5 +33,5 @@ flake8 = "^7.0.0"
 mypy = "^1.9.0"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["setuptools<65.5.0", "poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
