@@ -1,5 +1,2 @@
-
-
-
 class Config:
-    pass 
+    pass
