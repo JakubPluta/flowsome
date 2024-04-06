@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from flowsome.operators import ReadOperator, TransformOperator, WriteOperator
+from flowsome.tasks import ReadOperator, TransformOperator, WriteOperator
 from flowsome.pipeline import Pipeline
 
 

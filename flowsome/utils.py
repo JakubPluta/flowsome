@@ -7,14 +7,17 @@ from collections import OrderedDict, deque
 
 logger = get_logger(__name__)
 
+
 LAZY_SCAN_METHODS = {
     "csv": pl.scan_csv,
     "parquet": pl.scan_parquet,
     "json": pl.scan_ndjson,
-    "delta": pl.scan_delta,
     "ipc": pl.scan_ipc,
-    "iceberg": pl.scan_iceberg,
-    "arrow": pl.scan_pyarrow_dataset,
+    
+    # TODO: currently you can read, but you can't write to this format. 
+    # "delta": pl.scan_delta,
+    # "iceberg": pl.scan_iceberg,
+    # "arrow": pl.scan_pyarrow_dataset,
 }
 
 LAZY_SINK_METHODS = {
@@ -60,3 +63,4 @@ def get_sink_method(fmt: str) -> callable:
     if fmt.lower() not in LAZY_SINK_METHODS:
         raise ValueError(f"Unsupported file format: {fmt}")
     return LAZY_SINK_METHODS[fmt]
+
