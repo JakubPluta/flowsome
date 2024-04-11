@@ -1,32 +1,38 @@
-from flowsome.pipeline import Pipeline, PipelineRunner
+from flowsome.pipeline import DAG
 from flowsome.tasks import *
 
 import polars as pl 
 
 if __name__ == "__main__":
     
-    pipe = Pipeline()
-    
-    task1 = ReadTask("read1", "csv", source=r"tests/data/sample.csv")
-    task2 = TransformTask("transform1", "filter", Country="Cyprus")
-    task3 = TransformTask("transform2",  "limit", n=33)
-    task4 = WriteTask("write", "csv" , path=r"tests\data\output.csv")
+    dag = DAG()
 
-    read2 = ReadTask("read2", "csv", source=r"tests/data/sample.csv")
-    task5 = TransformTask("transform3", "limit", n=63)
+    r1 = ReadTask("r1", "csv", source=r"tests/data/sample.csv")
+    t1 = TransformTask("t1", "filter", Country="Cyprus")
+    w1 = WriteTask("w1", "csv", path="output.csv")
 
-    merge_task = MergeTask("merge", "join", on="Email", how="right")
+    r2 = ReadTask("r2", "csv", source=r"tests/data/sample.csv")
+    t2 = TransformTask("t2", "limit", n=44)
 
-    pipe.add_node(task1)
-    pipe.add_downstream(task1, task2)
-    pipe.add_downstream(task2, task3)
-    pipe.add_node(read2)
-    pipe.add_downstream(read2, task5)
-    pipe.add_downstream(task3, merge_task)
-    pipe.add_downstream(task5, merge_task)
-    pipe.add_downstream(merge_task, task4)
+    m = MergeTask("m", on="Email", how="right")
+    t3 = TransformTask("t3", "limit", n=41)
+
+    r3 = ReadTask("r3", "csv", source=r"tests/data/sample.csv")
+    t4 = TransformTask("t4", "limit", n=25)
+    m2 = MergeTask("m2", on="Email", how="right", suffix="m2")
+
+    dag.add_edge(r1, t1)
+    dag.add_edge(t1, m)
+
+    dag.add_edge(r2, t2)
+    dag.add_edge(t2, m)
+
+    dag.add_edge(m, t3)
+    dag.add_edge(t3, m2)
+
+    dag.add_edge(r3, t4)
+    dag.add_edge(t4, m2)
+    dag.add_edge(m2, w1)
 
 
-    runner = PipelineRunner(pipeline=pipe)
-    runner.run()
-    
+    dag.run()

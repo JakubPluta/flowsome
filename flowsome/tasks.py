@@ -21,40 +21,54 @@ class TaskType(str, enum.Enum):
     write = "write"
     merge = "merge"
 
-class Task:
+
+
+class TaskNode:
+    """
+    Node in a Directed Acyclic Graph (DAG)
+
+    Each node has a task (str) and references to its children and parents
+    """
     
     _type: TaskType
-
-    def __init__(self, task_id: str, *args, **params):
-        self._args = args
-        self._params = params
+    
+    def __init__(self, task_id, *args, **kwargs):
         self.task_id = task_id
-        self.successor: Task = None
-        self.predecessors: List[Task] = []
+        self.children = []
+        self.parents = []
         
+        self._args = args
+        self._params = kwargs
+
     def __repr__(self) -> str:
-        return f"Task(task_id={self.task_id}, type={self._type})"
+        return f"TaskNode(task_id={self.task_id}, children={self.children}, parents={self.parents})"
+    
 
-    def execute(self, *args, **kwargs):
-        raise NotImplementedError
+    def add_child(self, child):
+        """Add a child Node to this node"""
+        self.children.append(child)
 
-    def add_successor(self, task: "Task"):
-        self.successor = task
-        task.predecessors.append(self)
+    def add_parent(self, parent):
+        """Add a parent Node to this node"""
+        self.parents.append(parent)
 
-    def is_root(self) -> bool:
-        return not self.predecessors
-
+    def is_root(self):
+        """
+        Check if the current node is a root node by verifying if it has no parents.
+        """
+        return len(self.parents) == 0
+    
     def is_leaf(self) -> bool:
-        return self.successor is None
+        return len(self.children) == 0
     
-    def is_merge_task(self) -> bool:
-        return self._type == TaskType.merge
+    def is_fan_in(self) -> bool:
+        return len(self.parents) > 1
+    
+    def is_fan_out(self) -> bool:
+        return len(self.children) > 1
 
     
-
-
-class ReadTask(Task):
+class ReadTask(TaskNode):
     """Read data from a source in a specified format into a LazyFrame"""
     
     _type = TaskType.read
@@ -70,7 +84,7 @@ class ReadTask(Task):
             log.error("Error executing read task: %s", e)
             raise InvalidPipelineError from e
 
-class TransformTask(Task):
+class TransformTask(TaskNode):
     """Transform data in a LazyFrame"""
     
     _type = TaskType.transform
@@ -89,7 +103,7 @@ class TransformTask(Task):
             raise AttributeError from e
 
 
-class WriteTask(Task):
+class WriteTask(TaskNode):
     """Write LazyFrame to a destination in a specified format in a streaming mode"""
     _type = TaskType.write
 
@@ -105,7 +119,7 @@ class WriteTask(Task):
             raise InvalidPipelineError from e
 
 
-class MergeTask(TransformTask):
+class MergeTask(TaskNode):
     """Merge data from multiple sources into a single LazyFrame"""
     _type = TaskType.merge
     
