@@ -7,17 +7,17 @@ if __name__ == "__main__":
     
     p = Pipeline()
 
-    r1 = ReadTask("r1", "csv", source=r"tests/data/sample.csv")
+    r1 = ReadTask("r1", source=r"tests/data/sample.csv")
     t1 = TransformTask("t1", "filter", Country="Cyprus")
-    w1 = WriteTask("w1", "csv", path="output.csv")
+    w1 = WriteTask("w1", file_path="output.csv")
 
-    r2 = ReadTask("r2", "csv", source=r"tests/data/sample.csv")
+    r2 = ReadTask("r2",  source=r"tests/data/sample.csv")
     t2 = TransformTask("t2", "limit", n=44)
 
     m = MergeTask("m", on="Email", how="right")
     t3 = TransformTask("t3", "limit", n=41)
 
-    r3 = ReadTask("r3", "csv", source=r"tests/data/sample.csv")
+    r3 = ReadTask("r3",  source=r"tests/data/sample.csv")
     t4 = TransformTask("t4", "limit", n=25)
     m2 = MergeTask("m2", on="Email", how="right", suffix="m2")
 

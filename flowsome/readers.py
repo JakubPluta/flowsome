@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from functools import wraps
 import os
-from typing import Any, Union
+from typing import Any, Callable, Union
 import polars as pl
 from flowsome.log import get_logger
 
@@ -25,6 +26,12 @@ class ReaderRegistry:
     @classmethod
     def get_reader(cls, fmt):
         return cls._instances.get(fmt)
+
+
+
+def get_reader(fmt: str) -> Reader:
+    return ReaderRegistry.get_reader(fmt)
+
 
 
 class Reader:
@@ -53,8 +60,66 @@ JsonReader = Reader(pl.scan_ndjson, "json")
 
 
 
-def get_reader(fmt: str) -> Reader:
-    return ReaderRegistry.get_reader(fmt)
+
+def path_exists_decorator(func: Callable[[Any, os.PathLike | str, Any, Any], Any]) -> Callable[[Any, os.PathLike | str, Any, Any], Any]:
+    """
+    Decorator to check if the file path exists before executing the wrapped function.
+
+    :param func: The function to decorate.
+    :type func: function
+    :return: The wrapped function that checks the existence of the file path.
+    :rtype: function
+    """
+    @wraps(func)
+    def wrapper(
+        self: Any,
+        source: os.PathLike | str,
+        *args: Any,
+        **params: Any
+    ) -> Any:
+        """
+        Check if the file path exists before executing the wrapped function.
+
+        :param self: The instance of the class that the wrapped function is a method of.
+        :type self: Any
+        :param source: The file path to check.
+        :type source: str, os.PathLike
+        :param args: Additional args to pass to the wrapped function.
+        :param params: Additional keyword args to pass to the wrapped function.
+        :return: The return value of the wrapped function.
+        """
+        if not os.path.exists(source):
+            raise FileNotFoundError(f"File not found: {source}")
+        return func(self, source, *args, **params)
+    return wrapper
 
 
-__all__ = ["CsvReader", "IpcReader", "ParquetReader", "JsonReader", "get_reader"]
+
+
+class PolarsFileReader:
+    """
+    A class for reading data from a file in a specified format.
+    """
+
+
+    @path_exists_decorator
+    def read(self, source: os.PathLike | str, *args, **params) -> Any:
+        """
+        Read data from a file in a specified format.
+
+        :param source: The path to the file to read.
+        :type source: str, os.PathLike
+        :param args: Additional args to pass to the reader.
+        :param params: Additional keyword args to pass to the reader.
+        :return: The data read from the file.
+        :rtype: Any
+        :raises FileNotFoundError: If the file specified by `source` does not exist.
+        """
+        fmt = os.path.splitext(source)[1][1:]
+        reader: Reader = get_reader(fmt)
+        return reader.read(source=source, *args, **params)
+
+
+
+
+__all__ = ["PolarsFileReader"]
