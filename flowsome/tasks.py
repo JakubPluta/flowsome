@@ -4,7 +4,7 @@ from typing import List
 import enum
 from typing import Any, List
 import polars as pl
-from flowsome.utils import get_scan_method, get_sink_method
+from flowsome.readers.filereader import PolarsFileReader
 from flowsome.log import get_logger
 
 log = get_logger(__name__)
@@ -32,10 +32,10 @@ class TaskNode:
     
     _type: TaskType
     
-    def __init__(self, task_id, *args, **kwargs):
-        self.task_id = task_id
-        self.children = []
-        self.parents = []
+    def __init__(self, task_id: str, *args, **kwargs):
+        self.task_id: str = task_id
+        self.children: List[TaskNode] = []
+        self.parents: List[TaskNode] = []
         
         self._args = args
         self._params = kwargs
@@ -73,13 +73,12 @@ class ReadTask(TaskNode):
     
     _type = TaskType.read
 
-    def __init__(self, task_id: str, fmt: str, *args, **params: Any) -> None:
+    def __init__(self, task_id: str, *args, **params: Any) -> None:
         super().__init__(task_id, *args, **params)
-        self._reader = get_scan_method(fmt)
-        
+
     def execute(self) -> pl.LazyFrame:
         try:
-            return self._reader(*self._args, **self._params)
+            return PolarsFileReader.read(*self._args, **self._params)
         except Exception as e:
             log.error("Error executing read task: %s", e)
             raise InvalidPipelineError from e

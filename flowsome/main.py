@@ -1,11 +1,11 @@
-from flowsome.pipeline import DAG
+from flowsome.pipeline import Pipeline
 from flowsome.tasks import *
 
 import polars as pl 
 
 if __name__ == "__main__":
     
-    dag = DAG()
+    p = Pipeline()
 
     r1 = ReadTask("r1", "csv", source=r"tests/data/sample.csv")
     t1 = TransformTask("t1", "filter", Country="Cyprus")
@@ -21,18 +21,18 @@ if __name__ == "__main__":
     t4 = TransformTask("t4", "limit", n=25)
     m2 = MergeTask("m2", on="Email", how="right", suffix="m2")
 
-    dag.add_edge(r1, t1)
-    dag.add_edge(t1, m)
+    p.add_edge(r1, t1)
+    p.add_edge(t1, m)
 
-    dag.add_edge(r2, t2)
-    dag.add_edge(t2, m)
+    p.add_edge(r2, t2)
+    p.add_edge(t2, m)
 
-    dag.add_edge(m, t3)
-    dag.add_edge(t3, m2)
+    p.add_edge(m, t3)
+    p.add_edge(t3, m2)
 
-    dag.add_edge(r3, t4)
-    dag.add_edge(t4, m2)
-    dag.add_edge(m2, w1)
+    p.add_edge(r3, t4)
+    p.add_edge(t4, m2)
+    p.add_edge(m2, w1)
 
 
-    dag.run()
+    p.run()
