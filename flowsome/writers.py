@@ -9,7 +9,6 @@ from flowsome.log import get_logger
 logger = get_logger(__name__)
 
 
-
 PolarsSinkMethod: TypeAlias = Callable[..., None]
 FileFormat: TypeAlias = str
 
@@ -67,7 +66,7 @@ class PolarsFileWriter:
     def write(self, df: pl.LazyFrame, path: os.PathLike | str, *args, **params) -> Any:
         """
         Writes the LazyFrame `df` to the file specified by `path` using the appropriate lazy writer method.
-        
+
         :param df: The LazyFrame to be written.
         :type df: pl.LazyFrame
         :param path: The path to the file.
@@ -78,7 +77,7 @@ class PolarsFileWriter:
         :rtype: Any
         """
         fmt = self._file_format(path)
-        return self.get_lazy_writer(fmt)(df, path, *args, **params) 
+        return self.get_lazy_writer(fmt)(df, path, *args, **params)
 
 
 __all__ = ["PolarsFileWriter"]

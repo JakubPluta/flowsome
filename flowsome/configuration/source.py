@@ -31,7 +31,7 @@ class CsvSourceParams(BaseSourceParams):
     low_memory: bool = False
     skip_rows_after_header: int = 0
     try_parse_dates: bool = False
-    eol_char: str = "\n",
+    eol_char: str = ("\n",)
     new_columns: Sequence[str] | None = None
     raise_if_empty: bool = True
     truncate_ragged_lines: bool = False

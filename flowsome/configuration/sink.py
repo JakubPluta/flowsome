@@ -3,9 +3,11 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Literal
 
+
 @dataclass
 class SinkCommonParams:
     """Parameters common to sinks"""
+
     path: str | Path
     maintain_order: bool = True
     type_coercion: bool = True
@@ -19,6 +21,7 @@ class SinkCommonParams:
 @dataclass
 class SinkCsvParams(SinkCommonParams):
     """Parameters for sink_csv"""
+
     include_bom: bool = False
     include_header: bool = True
     separator: str = ","
