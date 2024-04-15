@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Callable, Dict, TypeAlias, Union
+from typing import Any, Callable, Dict, TypeAlias
 import polars as pl
 from flowsome.log import get_logger
 
@@ -33,11 +33,10 @@ def register_lazy_writer(name: str | FileFormat, func: PolarsSinkMethod) -> None
     if name in LazyWriterMethods:
         raise ValueError(f"Writer with name {name} already registered")
     LazyWriterMethods[name] = func
-    logger.info(f"Writer with name {name} registered")
+    logger.info("Writer with name %s registered", name)
 
 
 class PolarsFileWriter:
-
     def _file_format(self, path: os.PathLike | str) -> FileFormat:
         """Get the file format from the file path.
 
@@ -60,8 +59,8 @@ class PolarsFileWriter:
         """
         try:
             return LazyWriterMethods[fmt]
-        except KeyError:
-            raise ValueError(f"Writer with format {fmt} not registered")
+        except KeyError as e:
+            raise ValueError(f"Writer with format {fmt} not registered") from e
 
     def write(self, df: pl.LazyFrame, path: os.PathLike | str, *args, **params) -> Any:
         """

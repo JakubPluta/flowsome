@@ -16,8 +16,6 @@ def _create_single_path_pipeline(input_file_path, output_file_path):
     return pipe
 
 
-
-
 @pytest.fixture(params=["csv", "parquet", "json", "ipc"])
 def output_tmp_file(request, tmp_path):
     file_format = request.param
@@ -34,12 +32,12 @@ def input_test_file():
 
 def test_single_pipeline_execution(output_tmp_file, input_test_file):
     """
-    Test that a single pipeline can be run and the output file exists and is not empty."""
+    Test that a single pipeline can be run and the output file exists and is not empty.
+    """
     pipe = _create_single_path_pipeline(input_test_file, output_tmp_file)
     pipe.run()
-    assert os.path.exists(output_tmp_file) and os.path.isfile(output_tmp_file) and os.path.getsize(output_tmp_file) > 0
-
-
-
-    
-    
+    assert (
+        os.path.exists(output_tmp_file)
+        and os.path.isfile(output_tmp_file)
+        and os.path.getsize(output_tmp_file) > 0
+    )

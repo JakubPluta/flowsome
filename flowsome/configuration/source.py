@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Literal, Sequence
+from typing import Any, Dict, List, Literal, Sequence
 
 from polars import PolarsDataType
 

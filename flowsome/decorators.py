@@ -1,8 +1,8 @@
 from __future__ import annotations
-from functools import wraps
-from flowsome.log import get_logger
 import os
 from typing import Any, Callable
+from functools import wraps
+from flowsome.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -15,19 +15,22 @@ class TaskExecutionError(Exception):
 
 def try_except(func: Callable[[Any, Any, Any], Any]) -> Callable[[Any, Any, Any], Any]:
     """
-    Decorator to wrap a function with try-except block, catching any exception and logging an error before raising a TaskExecutionError.
+    Decorator to wrap a function with try-except block, catching any exception
+    and logging an error before raising a TaskExecutionError.
 
     :param func: The function to be wrapped with try-except block.
     :type func: Callable[[Any, Any, Any], Any]
     :return: A wrapped function with try-except block.
     :rtype: Callable[[Any, Any, Any], Any]
-    :raises TaskExecutionError: If an exception is caught during the execution of the wrapped function.
+    :raises TaskExecutionError: If an exception is caught during
+    the execution of the wrapped function.
     """
 
     @wraps(func)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         """
-        Wraps the function with try-except block, catching any exception and logging an error before raising a TaskExecutionError.
+        Wraps the function with try-except block, catching any exception
+        and logging an error before raising a TaskExecutionError.
 
         :param self: The instance of the class that the wrapped function is a method of.
         :type self: Any
@@ -35,7 +38,8 @@ def try_except(func: Callable[[Any, Any, Any], Any]) -> Callable[[Any, Any, Any]
         :param kwargs: The function keyword args.
         :return: The return value of the wrapped function.
         :rtype: Any
-        :raises TaskExecutionError: If an exception is caught during the execution of the wrapped function.
+        :raises TaskExecutionError: If an exception is caught during
+        the execution of the wrapped function.
         """
         try:
             return func(self, *args, **kwargs)

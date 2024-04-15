@@ -1,10 +1,7 @@
 from flowsome.pipeline import Pipeline
-from flowsome.tasks import *
-
-import polars as pl
+from flowsome.tasks import WriteTask, ReadTask, TransformTask, MergeTask
 
 if __name__ == "__main__":
-
     p = Pipeline()
 
     r1 = ReadTask("r1", source=r"tests/data/sample.csv")

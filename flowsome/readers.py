@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from functools import wraps
 import os
-from typing import Any, Callable, Dict, TypeAlias, Union
+from typing import Callable, Dict, TypeAlias
 import polars as pl
 from flowsome.log import get_logger
 from flowsome.decorators import path_exists
@@ -23,7 +22,8 @@ LazyReadersMethods: Dict[FileFormat, PolarsScanMethod] = {
 
 def register_lazy_reader(name: str | FileFormat, func: PolarsScanMethod) -> None:
     """
-    Registers a lazy reader method with a given name, and a function to be associated with it.
+    Registers a lazy reader method with a given name,
+    and a function to be associated with it.
 
     :param name: The name of the lazy reader.
     :type name: str | FileFormat
@@ -34,7 +34,7 @@ def register_lazy_reader(name: str | FileFormat, func: PolarsScanMethod) -> None
     if name in LazyReadersMethods:
         raise ValueError(f"Reader with name {name} already registered")
     LazyReadersMethods[name] = func
-    logger.info(f"Reader with name {name} registered")
+    logger.info("Reader with name %s registered", name)
 
 
 class PolarsFileReader:
@@ -64,8 +64,8 @@ class PolarsFileReader:
         """
         try:
             return LazyReadersMethods[fmt]
-        except KeyError:
-            raise ValueError(f"Reader with format {fmt} not registered")
+        except KeyError as e:
+            raise ValueError(f"Reader with format {fmt} not registered") from e
 
     @path_exists
     def read(self, source: os.PathLike | str, *args, **params) -> pl.LazyFrame:

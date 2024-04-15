@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generator, List
+from typing import Dict, Generator, List
 import polars as pl
 from flowsome.tasks import TaskNode
 from flowsome.log import get_logger
@@ -62,7 +62,7 @@ class DAG:
         try:
             return self.nodes[task_id]
         except KeyError as e:
-            log.error(f"Task {task_id} not found in DAG")
+            log.error("Task %s not found in DAG", task_id)
             raise KeyError from e
 
     @property
@@ -100,7 +100,7 @@ class DAG:
             if not node.parents and not node.children
         ]
         if orphan_nodes:
-            log.warning(f"Found {len(orphan_nodes)} orphan nodes in the DAG")
+            log.warning("Found %s orphan nodes in the DAG", len(orphan_nodes))
         return orphan_nodes
 
     def find_cycles(self) -> List[TaskNode]:
@@ -145,7 +145,7 @@ class DAG:
                 if depth_first_search(node_id, visited, stack):
                     cycle_nodes.append(self.nodes[node_id])
         if cycle_nodes:
-            log.warning(f"Found {len(cycle_nodes)} cycles in the DAG")
+            log.warning("Found %s cycles in the DAG", len(cycle_nodes))
 
         return cycle_nodes
 
@@ -193,7 +193,7 @@ class Pipeline(DAG):
         self._artifacts = {}
 
     def __repr__(self) -> str:
-        return "Pipeline(nodes={})".format(self.nodes)
+        return f"Pipeline(nodes={self.nodes})"
 
     def run(self) -> None:
         """

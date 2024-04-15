@@ -21,6 +21,8 @@ pytest-cov = "^4.1.0"
 networkx = "^3.2.1"
 matplotlib = "^3.8.3"
 tox = "^4.14.2"
+pre-commit = "^3.7.0"
+pylint = "^3.1.0"
 
 
 [tool.poetry.group.lint.dependencies]
@@ -30,3 +32,25 @@ mypy = "^1.9.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+ignore = ["E501"]
+unfixable = ["B"]
+exclude = ["tests/**"]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["E402", "F401"]
+"*.py" = ["D"]
+
+
+
+[tool.ruff.isort]
+combine-as-imports = true
+force-wrap-aliases = true
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip_gitignore = true
+combine_as_imports = true

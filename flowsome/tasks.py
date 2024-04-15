@@ -1,9 +1,7 @@
 from __future__ import annotations
 import enum
 import os
-from typing import Callable, List, Tuple
-import enum
-from typing import Any, List
+from typing import List, Tuple, Any
 import polars as pl
 from flowsome.readers import PolarsFileReader
 from flowsome.writers import PolarsFileWriter
