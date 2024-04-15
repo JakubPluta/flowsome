@@ -188,10 +188,6 @@ class Pipeline(DAG):
     A Pipeline class that inherits from the DAG class and adds a run() method.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
-        self._artifacts = {}
-
     def __repr__(self) -> str:
         return f"Pipeline(nodes={self.nodes})"
 

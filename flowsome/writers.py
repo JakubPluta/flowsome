@@ -9,7 +9,7 @@ from flowsome.log import get_logger
 logger = get_logger(__name__)
 
 
-PolarsSinkMethod: TypeAlias = Callable[..., None]
+PolarsSinkMethod: TypeAlias = Callable
 FileFormat: TypeAlias = str
 
 LazyWriterMethods: Dict[FileFormat, PolarsSinkMethod] = {

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Sequence
+from typing import Any, Dict, List, Literal, Sequence, Tuple
 
 from polars import PolarsDataType
 
@@ -31,7 +31,7 @@ class CsvSourceParams(BaseSourceParams):
     low_memory: bool = False
     skip_rows_after_header: int = 0
     try_parse_dates: bool = False
-    eol_char: str = ("\n",)
+    eol_char: Tuple[str] = ("\n",)
     new_columns: Sequence[str] | None = None
     raise_if_empty: bool = True
     truncate_ragged_lines: bool = False

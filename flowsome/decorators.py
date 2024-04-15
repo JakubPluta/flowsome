@@ -13,7 +13,7 @@ class TaskExecutionError(Exception):
     """
 
 
-def try_except(func: Callable[[Any, Any, Any], Any]) -> Callable[[Any, Any, Any], Any]:
+def try_except(func: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator to wrap a function with try-except block, catching any exception
     and logging an error before raising a TaskExecutionError.

@@ -20,14 +20,14 @@ class TaskType(str, enum.Enum):
     merge = "merge"
 
 
-class TransformMethods(str, enum.Enum):
+class TransformMethod(str, enum.Enum):
     """Transform methods that can be applied to a LazyFrame"""
 
-    filter = "filter"
-    join = "join"
-    select = "select"
-    sort = "sort"
-    limit = "limit"
+    FILTER: str = "filter"
+    JOIN: str = "join"
+    SELECT: str = "select"
+    SORT: str = "sort"
+    LIMIT: str = "limit"
 
 
 class TaskNode:
@@ -60,6 +60,9 @@ class TaskNode:
 
     def __repr__(self) -> str:
         return f"TaskNode(task_id={self.task_id})"
+
+    def execute(self, *args: Any, **kwargs: Any) -> pl.LazyFrame:
+        raise NotImplementedError
 
     def add_child(self, child: TaskNode) -> None:
         """
@@ -148,7 +151,7 @@ class ReadTask(TaskNode, PolarsFileReader):
         :return: A LazyFrame containing the data read from the source.
         :rtype: pl.LazyFrame
         """
-        return self.read(source=self.source, *self._args, **self._params)
+        return self.read(self.source, *self._args, **self._params)
 
 
 class WriteTask(TaskNode, PolarsFileWriter):
@@ -176,13 +179,13 @@ class WriteTask(TaskNode, PolarsFileWriter):
         self.file_path: os.PathLike | str = file_path
 
     @try_except
-    def execute(self, df: pl.LazyFrame) -> None:
+    def execute(self, df: pl.LazyFrame) -> Any:
         """
         Executes the task by writing the LazyFrame `df` to the file specified by `file_path` using the appropriate method.
 
         :param df: The LazyFrame to be written.
         :type df: pl.LazyFrame
-        :return: None
+        :return: Any
         """
         return self.write(df, self.file_path, *self._args, **self._params)
 
@@ -193,7 +196,7 @@ class TransformTask(TaskNode):
     _type = TaskType.transform
 
     def __init__(
-        self, task_id: str, func: TransformMethods, *args: Any, **params: Any
+        self, task_id: str, func: TransformMethod | str, *args: Any, **params: Any
     ) -> None:
         """
         Initializes the TransformTask with the given task_id, transform_method, args, and params.
@@ -201,7 +204,7 @@ class TransformTask(TaskNode):
         :param task_id: The identifier of the task.
         :type task_id: str
         :param func: The method to transform the LazyFrame.
-        :type func: TransformMethods
+        :type func: TransformMethod
         :param args: Positional arguments to be passed to the task.
         :type args: Any
         :param params: Keyword arguments to be passed to the task.
@@ -234,8 +237,8 @@ class MergeTask(TaskNode):
     _type = TaskType.merge
 
     def _swap_dfs(
-        self, df: pl.LazyFrame | pl.DataFrame, other_df: pl.LazyFrame | pl.DataFrame
-    ) -> Tuple[pl.LazyFrame | pl.DataFrame, pl.LazyFrame | pl.DataFrame]:
+        self, df: pl.LazyFrame, other_df: pl.LazyFrame
+    ) -> Tuple[pl.LazyFrame, pl.LazyFrame]:
         """
         A function that swaps the input dataframes based on the value of the 'how' parameter and returns the swapped dataframes as a tuple.
         :param df: The first DataFrame to be swapped
@@ -251,18 +254,16 @@ class MergeTask(TaskNode):
         return df, other_df
 
     @try_except
-    def execute(
-        self, df: pl.DataFrame | pl.LazyFrame, other_df: pl.DataFrame | pl.LazyFrame
-    ) -> pl.LazyFrame | pl.DataFrame:
+    def execute(self, df: pl.LazyFrame, other_df: pl.LazyFrame) -> pl.LazyFrame:
         """
         Executes the task by merging the LazyFrames `df` and `other_df` using the join method.
 
         :param df: The first LazyFrame to be merged.
-        :type df: pl.DataFrame | pl.LazyFrame
+        :type df: pl.LazyFrame
         :param other_df: The second LazyFrame to be merged.
-        :type other_df: pl.DataFrame | pl.LazyFrame
+        :type other_df: pl.LazyFrame
         :return: The resulting merged LazyFrame.
-        :rtype: pl.LazyFrame | pl.DataFrame
+        :rtype: pl.LazyFrame
         """
         df, other_df = self._swap_dfs(df, other_df)
         return df.join(other_df, *self._args, **self._params)
