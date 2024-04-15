@@ -212,7 +212,7 @@ class TransformTask(TaskNode):
         """
         super().__init__(task_id, *args, **params)
 
-        if func not in TransformMethods or not hasattr(pl.LazyFrame, func):
+        if not hasattr(pl.LazyFrame, func):
             raise ValueError(f"Transformation method {func} is not supported.")
 
         self.func: str = func
