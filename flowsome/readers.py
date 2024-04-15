@@ -2,97 +2,38 @@ from __future__ import annotations
 
 from functools import wraps
 import os
-from typing import Any, Callable, Union
+from typing import Any, Callable, Dict, TypeAlias, Union
 import polars as pl
 from flowsome.log import get_logger
-
+from flowsome.decorators import path_exists
 
 
 logger = get_logger(__name__)
 
+PolarsScanMethod: TypeAlias = Callable[..., pl.LazyFrame]
+FileFormat: TypeAlias = str
 
-PolarsLazyReadMethod = Union[pl.scan_csv, pl.scan_parquet, pl.scan_ndjson, pl.scan_ipc]
+LazyReadersMethods: Dict[FileFormat, PolarsScanMethod] = {
+    "csv": pl.scan_csv,
+    "ipc": pl.scan_ipc,
+    "parquet": pl.scan_parquet,
+    "json": pl.scan_ndjson
+}
 
-
-class ReaderRegistry:
-    _instances = {}
-    
-    @classmethod
-    def register_reader(cls, reader_instance):
-        if reader_instance._fmt in cls._instances:
-            raise ValueError(f"Reader with format {reader_instance._fmt} already registered")
-        cls._instances[reader_instance._fmt] = reader_instance
-    
-    @classmethod
-    def get_reader(cls, fmt):
-        return cls._instances.get(fmt)
-
-
-
-def get_reader(fmt: str) -> Reader:
-    return ReaderRegistry.get_reader(fmt)
-
-
-
-class Reader:
-
-    def __init__(self, reader: PolarsLazyReadMethod, fmt: str) -> None:
-        self._reader = reader
-        self._fmt = fmt
-        ReaderRegistry.register_reader(self)
-    
-        
-    def __repr__(self) -> str:
-        return f"Reader(reader={self._reader.__name__}, fmt={self._fmt})"
-    
-    def __call__(self, source: os.PathLike | str, *args, **params) -> Any:
-        return self._reader(source, *args, **params)
-    
-    def read(self, source: os.PathLike | str, *args, **params) -> Any:
-        return self._reader(source, *args, **params)
-
-
-CsvReader = Reader(pl.scan_csv, "csv")
-IpcReader = Reader(pl.scan_ipc, "ipc")
-ParquetReader = Reader(pl.scan_parquet, "parquet")
-JsonReader = Reader(pl.scan_ndjson, "json")
-
-
-
-
-
-def path_exists_decorator(func: Callable[[Any, os.PathLike | str, Any, Any], Any]) -> Callable[[Any, os.PathLike | str, Any, Any], Any]:
+def register_lazy_reader(name: str | FileFormat, func: PolarsScanMethod) -> None:
     """
-    Decorator to check if the file path exists before executing the wrapped function.
+    Registers a lazy reader method with a given name, and a function to be associated with it. 
 
-    :param func: The function to decorate.
-    :type func: function
-    :return: The wrapped function that checks the existence of the file path.
-    :rtype: function
+    :param name: The name of the lazy reader.
+    :type name: str | FileFormat
+    :param func: The function to be associated with the lazy reader.
+    :type func: PolarsScanMethod
+    :return: None
     """
-    @wraps(func)
-    def wrapper(
-        self: Any,
-        source: os.PathLike | str,
-        *args: Any,
-        **params: Any
-    ) -> Any:
-        """
-        Check if the file path exists before executing the wrapped function.
-
-        :param self: The instance of the class that the wrapped function is a method of.
-        :type self: Any
-        :param source: The file path to check.
-        :type source: str, os.PathLike
-        :param args: Additional args to pass to the wrapped function.
-        :param params: Additional keyword args to pass to the wrapped function.
-        :return: The return value of the wrapped function.
-        """
-        if not os.path.exists(source):
-            raise FileNotFoundError(f"File not found: {source}")
-        return func(self, source, *args, **params)
-    return wrapper
-
+    if name in LazyReadersMethods:
+        raise ValueError(f"Reader with name {name} already registered")
+    LazyReadersMethods[name] = func
+    logger.info(f"Reader with name {name} registered")
 
 
 
@@ -100,24 +41,47 @@ class PolarsFileReader:
     """
     A class for reading data from a file in a specified format.
     """
-
-
-    @path_exists_decorator
-    def read(self, source: os.PathLike | str, *args, **params) -> Any:
-        """
-        Read data from a file in a specified format.
-
-        :param source: The path to the file to read.
+    
+    def _file_format(self, source: os.PathLike | str) -> FileFormat:
+        """Get the file format from the file path.
+        
+        :param source: The path to the file.
         :type source: str, os.PathLike
-        :param args: Additional args to pass to the reader.
-        :param params: Additional keyword args to pass to the reader.
-        :return: The data read from the file.
-        :rtype: Any
-        :raises FileNotFoundError: If the file specified by `source` does not exist.
+        :return: The file format.
+        :rtype: str
         """
-        fmt = os.path.splitext(source)[1][1:]
-        reader: Reader = get_reader(fmt)
-        return reader.read(source=source, *args, **params)
+        return os.path.splitext(source)[1][1:]
+
+    def get_lazy_reader(self, fmt: str | FileFormat) -> PolarsScanMethod:
+        """
+        Tries to return the lazy reader method associated with the given format.
+        
+        :param fmt: The format of the reader.
+        :type fmt: str | FileFormat
+        :return: The lazy reader method associated with the format.
+        :rtype: PolarsScanMethod
+        :raises ValueError: If the reader with the specified format is not registered.
+        """
+        try:
+            return LazyReadersMethods[fmt]
+        except KeyError:
+            raise ValueError(f"Reader with format {fmt} not registered")
+
+    @path_exists
+    def read(self, source: os.PathLike | str, *args, **params) -> pl.LazyFrame:
+        """
+        Read data from a source in a specified format into a LazyFrame
+        
+        :param source: The path to the file.
+        :type source: str, os.PathLike
+        :param args: Additional args to pass to the lazy reader method.
+        :param params: Additional keyword args to pass to the lazy reader method.
+        :return: A LazyFrame
+        :rtype: pl.LazyFrame
+        
+        """
+        fmt = self._file_format(source)
+        return self.get_lazy_reader(fmt)(source, *args, **params)
 
 
 
