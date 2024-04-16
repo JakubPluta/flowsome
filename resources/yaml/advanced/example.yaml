@@ -1,0 +1,68 @@
+%YAML 1.2
+---
+name: advanced
+pipeline:
+  sources:
+    - name: source1
+      type: file
+      format: csv
+      path: ../data.csv
+    - name: source2
+      type: file
+      format: csv
+      path: ../data.csv
+
+  transformations:
+    - name: filter-transform
+      type: filter
+      source: source1
+      params:
+        Country: "Cyprus"
+    - name: limit-transform
+      type: limit
+      source: filter-transform
+      params:
+        n: 10
+    - name: select-transform
+      type: select
+      source: limit-transform
+      params:
+        columns:
+          [
+            "Last Name",
+            "Country",
+            "City",
+            "Phone 1",
+            "Email",
+            "Subscription Date",
+          ]
+
+    - name: limit-transform-2
+      type: limit
+      source: source2
+      params:
+        n: 23
+    - name: select-transform-2
+      type: select
+      source: limit-transform-2
+      params:
+        columns: ["Email", "Subscription Date"]
+
+    - name: merge-transform
+      type: merge
+      sources: [select-transform, select-transform-2]
+      params:
+        join_key: Email
+        how: right
+
+    - name: limit-transform-3
+      type: limit
+      source: merge-transform
+      params:
+        n: 3
+  targets:
+    - name: target1
+      source: limit-transform-3
+      type: file
+      format: parquet
+      path: ../result.parquet
