@@ -2,15 +2,9 @@ from typing import Dict, Generator, List
 import polars as pl
 from flowsome.tasks import TaskNode
 from flowsome.log import get_logger
-
+from flowsome.exc import PipelineCycleError
 
 log = get_logger(__name__)
-
-
-class PipelineCycleError(Exception):
-    """
-    Raised when a pipeline has a cycle in its dependency graph
-    """
 
 
 class DAG:
@@ -102,6 +96,17 @@ class DAG:
         if orphan_nodes:
             log.warning("Found %s orphan nodes in the DAG", len(orphan_nodes))
         return orphan_nodes
+
+    def find_root_nodes(self) -> List[TaskNode]:
+        """
+        Find root nodes in the DAG.
+
+        :return: A list of root nodes.
+        :rtype: List[TaskNode]
+        """
+        return [
+            node for node in self.nodes.values() if not node.parents and node.children
+        ]
 
     def find_cycles(self) -> List[TaskNode]:
         """
@@ -244,3 +249,6 @@ class Pipeline(DAG):
         for _, node in self.nodes.items():
             if node.is_root():
                 execute_node(node)
+
+
+__all__ = ["Pipeline", "PipelineCycleError"]

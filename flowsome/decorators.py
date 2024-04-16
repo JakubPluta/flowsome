@@ -3,14 +3,9 @@ import os
 from typing import Any, Callable
 from functools import wraps
 from flowsome.log import get_logger
+from flowsome.exc import TaskExecutionError
 
 logger = get_logger(__name__)
-
-
-class TaskExecutionError(Exception):
-    """
-    Raised when an error occurs while executing a task.
-    """
 
 
 def try_except(func: Callable[..., Any]) -> Callable[..., Any]:

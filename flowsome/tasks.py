@@ -267,3 +267,6 @@ class MergeTask(TaskNode):
         """
         df, other_df = self._swap_dfs(df, other_df)
         return df.join(other_df, *self._args, **self._params)
+
+
+__all__ = ["ReadTask", "WriteTask", "TransformTask", "MergeTask", "TaskNode"]
