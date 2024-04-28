@@ -1,7 +1,7 @@
 from __future__ import annotations
 import enum
 import os
-from typing import List, Tuple, Any
+from typing import Callable, List, Tuple, Any, TypeAlias
 import polars as pl
 from flowsome.readers import PolarsFileReader
 from flowsome.writers import PolarsFileWriter
@@ -9,6 +9,8 @@ from flowsome.log import get_logger
 from flowsome.decorators import try_except
 
 log = get_logger(__name__)
+
+TransformMethod: TypeAlias = str | Callable[..., pl.LazyFrame]
 
 
 class TaskType(str, enum.Enum):
@@ -18,16 +20,6 @@ class TaskType(str, enum.Enum):
     transform = "transform"
     write = "write"
     merge = "merge"
-
-
-class TransformMethod(str, enum.Enum):
-    """Transform methods that can be applied to a LazyFrame"""
-
-    FILTER: str = "filter"
-    JOIN: str = "join"
-    SELECT: str = "select"
-    SORT: str = "sort"
-    LIMIT: str = "limit"
 
 
 class TaskNode:
